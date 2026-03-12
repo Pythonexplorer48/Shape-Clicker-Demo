@@ -285,8 +285,8 @@ class ShopButton {
     }
 }
 
-const IdleLine = new ClickerLine(30, canvas.height / 2);
-const IdleCircle = new ClickerCircle(30, canvas.height / 2);
+const IdleLine = new ClickerLine(30, 455);
+const IdleCircle = new ClickerCircle(30, 455);
 let lines = 0n;
 let LPC = 1n; // LPC stands for lines per click
 let LPS = 0n; // LPS stand for lines per second
