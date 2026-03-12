@@ -203,19 +203,20 @@ class ClickerCircle {
 }
 
 class ShopButton {
+    static instances = []; 
     constructor(x, y, name, iconSrc, initialCost, rewardFunc) {
         this.x = x;
         this.y = y;
         this.width = 450;
         this.height = 120;
         this.name = name;
-        this.cost = initialCost;
+        this.cost = BigInt(initialCost);
         this.reward = rewardFunc;
-
         this.icon = new Image();
         this.icon.src = iconSrc;
-        
         this.wasPressed = false;
+
+        ShopButton.instances.push(this);
     }
 
     update() {
@@ -229,9 +230,14 @@ class ShopButton {
 
         if (isHovering && mouseState.isDown && !this.wasPressed) {
             if (lines >= this.cost) {
-                lines -= this.cost;
+                try {
+                    lines -= BigInt(this.cost);
+                } catch (error) {
+                    console.warn("Math failed, forcing BigInt conversion:", error);
+                    lines = BigInt(lines || 0n) - BigInt(this.cost || 0n);
+                }
                 this.reward();
-                this.cost = Math.round(this.cost * 1.35);
+                this.cost = BigInt(Math.round(Number(this.cost) * 1.35));
             }
         }
         this.wasPressed = mouseState.isDown;
@@ -281,9 +287,9 @@ class ShopButton {
 
 const IdleLine = new ClickerLine(30, canvas.height / 2);
 const IdleCircle = new ClickerCircle(30, canvas.height / 2);
-let lines = 0;
-let LPC = 1; // LPC stands for lines per click
-let LPS = 0; // LPS stand for lines per second
+let lines = 0n;
+let LPC = 1n; // LPC stands for lines per click
+let LPS = 0n; // LPS stand for lines per second
 let onedBuilders = 0;
 let lineFactories = 0;
 let beamWeavers = 0;
@@ -299,149 +305,15 @@ let xenoWeavers = 0;
 let xenoEXTRUDERS = 0;
 let XENOrollers = 0;
 let OMNIBUILDERS = 0;
-let circles = 0;
-let CPC = 1;
-let CPS = 0;
+let circles = 0n;
+let CPC = 1n;
+let CPS = 0n;
 let gamelooptwo = 0;
-
-const builderButton = new ShopButton(
-    SHOP_X, 85,
-    "1D BUILDER",
-    "images/1D_Builder.png",
-    15,
-    () => { LPS += 1; onedBuilders++; }
-);
-const factoryButton = new ShopButton(
-    SHOP_X, 215,
-    "LINE FACTORY",
-    "images/Line Factory.png",
-    225,
-    () => { LPS += 10, lineFactories++; }
-);
-const weaverButton = new ShopButton(
-    SHOP_X, 345,
-    "Beam weaver",
-    "images/beam weaver.png",
-    3750,
-    () => { LPS += 75, beamWeavers++; }
-);
-const transmuterButton = new ShopButton(
-    SHOP_X, 475,
-    "Flux Transmuter",
-    "images/Flux Transmuter.png",
-    77777,
-    () => { LPS += 777, fluxTransmuters++; }
-);
-const cursorPower = new ShopButton(
-    UPGRADE_X, 85,
-    "Cursor Power",
-    "images/Cursor Power.png",
-    100000,
-    () => { LPC++, cursorPowers++; }
-);
-const extruderButton = new ShopButton(
-    SHOP_X, 605,
-    "Macro-Extruder",
-    "images/Macro-Extruder.png",
-    785000,
-    () => { LPS += 8250, macroExtruders++; }
-);
-const cutterButton = new ShopButton(
-    SHOP_X, 735,
-    "Line Cutter",
-    "images/Line Cutter.png",
-    8585000,
-    () => { LPS += 78000, lineCutters++; }
-);
-const singularityButton = new ShopButton(
-    SHOP_X, 865,
-    "1D Singularity",
-    "images/Linear Singularity.png",
-    114035000,
-    () => { LPS += 1200000, linearSingularities++; }
-);
-const clickDoubler = new ShopButton(
-    UPGRADE_X, 215,
-    "Click doubler",
-    "images/Click Doubler.png",
-    300000000,
-    () => { LPC *= 2, clickDoubler.cost *= 4.5; }
-);
-const spinnerButton = new ShopButton(
-    SHOP_X, 995,
-    "NanoLine Roller",
-    "images/Nanostrand Spinner.png",
-    5250000850,
-    () => { LPS += 885000, nanostrandSpinners++; }
-);
-const extractorButton = new ShopButton(
-    SHOP_X, 1125,
-    "Magnetar Siphon",
-    "images/Magnetar Extractor.png",
-    186250958350,
-    () => { LPS += 3000000, magnetarExtractors++; }
-);
-const pressurizerButton = new ShopButton(
-    SHOP_X, 1255,
-    "Nova Chamber",
-    "images/Nova Pressurizer.png",
-    5300402821000,
-    () => { LPS += 10500000, novaPressurizers++; }
-);
-const loomButton = new ShopButton(
-    SHOP_X, 1255,
-    "Metaversal Loom",
-    "images/Metaversal Loom.png",
-    98007065432100,
-    () => { LPS += 89325000, novaPressurizers++; }
-);
-const xenoweaverButton = new ShopButton(
-    SHOP_X, 1385,
-    "XENO-weaver",
-    "images/xeno-weaver.png",
-    860000000000000,
-    () => { LPS += 1080525000, xenoWeavers++; }
-);
-const xenoextruderButton = new ShopButton(
-    SHOP_X, 1515,
-    "xeno-EXTRUDER",
-    "images/xeno-extruder.png",
-    3860000000145000,
-    () => { LPS += 24800329500, xenoEXTRUDERS++; }
-);
-const xenorollerButton = new ShopButton(
-    SHOP_X, 1645,
-    "XENO-ROLLER",
-    "images/xeno-roller.png",
-    98057060900145297,
-    () => { LPS += 854609833700, XENOrollers++; }
-);
-const clickSquared = new ShopButton(
-    UPGRADE_X, 345,
-    "Click Squared",
-    "images/Clicker Squarer.png",
-    500000000000000000,
-    () => { LPC *= LPC; clickSquared.cost *= clickSquared.cost; }
-);
-const omnibuilderButton = new ShopButton(
-    1080, 1850,
-    "OMNI-BUILDER",
-    "images/Omni-Builder.png",
-    888888888888888888,
-    () => { LPS += 18999999999999999, LPC * 3, omnibuilderButton.cost *= 100, omnibuilderButton.cost = omnibuilderButton.cost / 1.35, OMNIBUILDERS++; }
-);
-const evolve = new ShopButton(
-    900, 930,
-    "EVOLVE",
-    "images/Shapes Clicker Circle.png",
-    1000000000000000000,
-    () => { gameloop2(), gamelooptwo = 1; }
-)
 
 function gameloop() {
     if (gamelooptwo === 1) {
     gameloop2();
-    throw new Error("Gameloop 2 reached!");
+    return;
     }
     ctx.fillStyle = "black"; 
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -454,8 +326,14 @@ function gameloop() {
     IdleLine.update();
     IdleLine.draw();
     if (!window.lastIdleTime) window.lastIdleTime = Date.now();
+
     if (Date.now() - window.lastIdleTime >= 1000) {
-        lines += LPS;
+        try {
+            lines += BigInt(LPS || 0n); 
+        } catch (error) {
+            console.warn("LPS Addition failed:", error);
+            lines = BigInt(lines || 0n) + BigInt(LPS || 0n);
+        }
         window.lastIdleTime = Date.now();
     }
 
@@ -530,7 +408,7 @@ function gameloop2() {
     IdleCircle.draw();
     if (!window.lastIdleTime) window.lastIdleTime = Date.now();
     if (Date.now() - window.lastIdleTime >= 1000) {
-        circles += CPS;
+        circles += BigInt(CPS || 0n);
         window.lastIdleTime = Date.now();
     }
     
@@ -550,46 +428,100 @@ function gameloop2() {
     ctx.font = "20px ShapeMaelstrom, Arial, sans-serif";
     ctx.fillText(`${formatLargeNumber(CPS)}: circles per sec`, 2, canvas.height / 2.5)
 
-    requestAnimationFrame(gameloop);
+    requestAnimationFrame(gameloop2);
 }
-
 document.fonts.load('60px ShapeMaelstrom').then(() => {
     gameloop();
 });
+
 window.onload = () => {
     const canvas = document.getElementById('gameCanvas');
     canvas.width = 1920;
     canvas.height = 1080;
-    
     window.dispatchEvent(new Event('resize'));
 };
+
+const builderButton = new ShopButton(SHOP_X, 85, "1D BUILDER", "images/1D_Builder.png", 15, () => { LPS += 1n; onedBuilders++; });
+const factoryButton = new ShopButton(SHOP_X, 215, "LINE FACTORY", "images/Line Factory.png", 225, () => { LPS += 10n; lineFactories++; });
+const weaverButton = new ShopButton(SHOP_X, 345, "Beam weaver", "images/beam weaver.png", 3750, () => { LPS += 75n; beamWeavers++; });
+const transmuterButton = new ShopButton(SHOP_X, 475, "Flux Transmuter", "images/Flux Transmuter.png", 77777, () => { LPS += 777n; fluxTransmuters++; });
+const cursorPower = new ShopButton(UPGRADE_X, 85, "Cursor Power", "images/Cursor Power.png", 100000, () => { LPC += 1n; cursorPowers++; });
+const extruderButton = new ShopButton(SHOP_X, 605, "Macro-Extruder", "images/Macro-Extruder.png", 785000, () => { LPS += 8250n; macroExtruders++; });
+const cutterButton = new ShopButton(SHOP_X, 735, "Line Cutter", "images/Line Cutter.png", 8585000, () => { LPS += 78000n; lineCutters++; });
+const singularityButton = new ShopButton(SHOP_X, 865, "1D Singularity", "images/Linear Singularity.png", 114035000, () => { LPS += 1200000n; linearSingularities++; });
+const clickDoubler = new ShopButton(UPGRADE_X, 215, "Click doubler", "images/Click Doubler.png", 300000000, () => { LPC *= 2n; clickDoubler.cost = BigInt(Math.round(Number(clickDoubler.cost) * 4.5)); });
+const spinnerButton = new ShopButton(SHOP_X, 995, "NanoLine Roller", "images/Nanostrand Spinner.png", 5250000850, () => { LPS += 885000n; nanostrandSpinners++; });
+const extractorButton = new ShopButton(SHOP_X, 1125, "Magnetar Siphon", "images/Magnetar Extractor.png", 186250958350, () => { LPS += 3000000n; magnetarExtractors++; });
+const pressurizerButton = new ShopButton(SHOP_X, 1255, "Nova Chamber", "images/Nova Pressurizer.png", 5300402821000, () => { LPS += 10500000n; novaPressurizers++; });
+const loomButton = new ShopButton(SHOP_X, 1255, "Metaversal Loom", "images/Metaversal Loom.png", 98007065432100, () => { LPS += 89325000n; novaPressurizers++; });
+const xenoweaverButton = new ShopButton(SHOP_X, 1385, "XENO-weaver", "images/xeno-weaver.png", 860000000000000, () => { LPS += 1080525000n; xenoWeavers++; });
+const xenoextruderButton = new ShopButton(SHOP_X, 1515, "xeno-EXTRUDER", "images/xeno-extruder.png", 3860000000145000, () => { LPS += 24800329500n; xenoEXTRUDERS++; });
+const xenorollerButton = new ShopButton(SHOP_X, 1645, "XENO-ROLLER", "images/xeno-roller.png", 98057060900145297, () => { LPS += 854609833700n; XENOrollers++; });
+const clickSquared = new ShopButton(UPGRADE_X, 345, "Click Squared", "images/Clicker Squarer.png", 500000000000000000, () => { LPC *= LPC; clickSquared.cost *= clickSquared.cost; });
+const omnibuilderButton = new ShopButton(1080, 1850, "OMNI-BUILDER", "images/Omni-Builder.png", 888888888888888888, () => { LPS += 18999999999999999n; LPC *= 3n; omnibuilderButton.cost = BigInt(Math.round(Number(omnibuilderButton.cost) / 1.35 * 100)); OMNIBUILDERS++; });
+const evolve = new ShopButton(900, 930, "EVOLVE", "images/Shapes Clicker Circle.png", 1000000000000000000, () => { gamelooptwo = 1; });
 
 function handleAutoSave() {
     const data = {
         lines: lines.toString(),
         LPC: LPC.toString(),
         LPS: LPS.toString(),
-        onedBuilders: onedBuilders,
-        lineFactories: lineFactories
+        circles: circles.toString(),
+        CPC: CPC.toString(),
+        CPS: CPS.toString(),
+        gamelooptwo: gamelooptwo,
+        counts: {
+            onedBuilders, lineFactories, beamWeavers, fluxTransmuters,
+            cursorPowers, macroExtruders, lineCutters, linearSingularities,
+            nanostrandSpinners, magnetarExtractors, novaPressurizers,
+            xenoWeavers, xenoEXTRUDERS, XENOrollers, OMNIBUILDERS
+        },
+        buttonCosts: ShopButton.instances.map(btn => btn.cost.toString())
     };
     localStorage.setItem('ShapeClicker_Save', JSON.stringify(data));
+    console.log("Game Saved!");
 }
 
 function handleAutoLoad() {
     const saved = localStorage.getItem('ShapeClicker_Save');
-    if (saved) {
+    if (!saved) return;
+    try {
         const data = JSON.parse(saved);
         lines = BigInt(data.lines || "0");
         LPC = BigInt(data.LPC || "1");
         LPS = BigInt(data.LPS || "0");
-        onedBuilders = data.onedBuilders || 0;
-        lineFactories = data.lineFactories || 0;
-        console.log("Progress restored automatically!");
+        circles = BigInt(data.circles || "0");
+        CPC = BigInt(data.CPC || "1");
+        CPS = BigInt(data.CPS || "0");
+        gamelooptwo = Number(data.gamelooptwo || 0);
+        if (data.counts) {
+            onedBuilders = Number(data.counts.onedBuilders || 0);
+            lineFactories = Number(data.counts.lineFactories || 0);
+            beamWeavers = Number(data.counts.beamWeavers || 0);
+            fluxTransmuters = Number(data.counts.fluxTransmuters || 0);
+            cursorPowers = Number(data.counts.cursorPowers || 0);
+            macroExtruders = Number(data.counts.macroExtruders || 0);
+            lineCutters = Number(data.counts.lineCutters || 0);
+            linearSingularities = Number(data.counts.linearSingularities || 0);
+            nanostrandSpinners = Number(data.counts.nanostrandSpinners || 0);
+            magnetarExtractors = Number(data.counts.magnetarExtractors || 0);
+            novaPressurizers = Number(data.counts.novaPressurizers || 0);
+            xenoWeavers = Number(data.counts.xenoWeavers || 0);
+            xenoEXTRUDERS = Number(data.counts.xenoEXTRUDERS || 0);
+            XENOrollers = Number(data.counts.XENOrollers || 0);
+            OMNIBUILDERS = Number(data.counts.OMNIBUILDERS || 0);
+        }
+        if (data.buttonCosts && data.buttonCosts.length === ShopButton.instances.length) {
+            data.buttonCosts.forEach((costStr, index) => {
+                ShopButton.instances[index].cost = BigInt(costStr);
+            });
+        }
+        console.log("Progress restored!");
+    } catch (e) {
+        console.error("Save data corrupted.", e);
     }
 }
 
 handleAutoLoad();
-
 setInterval(handleAutoSave, 10000);
-
 window.onbeforeunload = handleAutoSave;
