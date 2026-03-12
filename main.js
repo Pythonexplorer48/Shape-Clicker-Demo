@@ -34,6 +34,55 @@ window.addEventListener('mouseup', () => {
     mouseState.isDown = false; 
 });
 
+function ResetGame() {
+    if (confirm("By doing this you will lose all progress and be reset back to the beginning of the entire game are you sure?")) {
+        
+        localStorage.removeItem('ShapeClicker_Save');
+        lines = 0n;
+        LPC = 1n; // LPC stands for lines per click
+        LPS = 0n; // LPS stand for lines per second
+        onedBuilders = 0;
+        lineFactories = 0;
+        beamWeavers = 0;
+        fluxTransmuters = 0;
+        cursorPowers = 0;
+        macroExtruders = 0;
+        lineCutters = 0;
+        linearSingularities = 0;
+        nanostrandSpinners = 0;
+        magnetarExtractors = 0;
+        novaPressurizers = 0;
+        xenoWeavers = 0;
+        xenoEXTRUDERS = 0;
+        XENOrollers = 0;
+        OMNIBUILDERS = 0;
+        circles = 0n;
+        CPC = 1n;
+        CPS = 0n;
+        gamelooptwo = 0;
+
+        localStorage.clear(); 
+        window.location.reload(); 
+    }
+}
+
+window.addEventListener('touchstart', (e) => {
+    e.preventDefault(); 
+    
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0]; 
+    
+    mouseState.x = (touch.clientX - rect.left) * (1920 / rect.width);
+    mouseState.y = (touch.clientY - rect.top) * (1080 / rect.height);
+    
+    mouseState.isDown = true;
+}, { passive: false });
+
+window.addEventListener('touchend', () => {
+    mouseState.isDown = false;
+});
+
+
 let scrollY = 0;
 const maxScroll = 1000;
 window.addEventListener('wheel', (e) => {
