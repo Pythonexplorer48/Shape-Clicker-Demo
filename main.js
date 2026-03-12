@@ -417,7 +417,7 @@ const xenorollerButton = new ShopButton(
     () => { LPS += 854609833700, XENOrollers++; }
 );
 const clickSquared = new ShopButton(
-    SHOP_X, 345,
+    UPGRADE_X, 345,
     "Click Squared",
     "images/Clicker Squarer.png",
     500000000000000000,
